@@ -242,10 +242,12 @@ const TransactionForm = () => {
             
             <Grid item xs={12} md={6}>
               <Autocomplete
+                fullWidth
                 options={products}
-                getOptionLabel={(option) => `${option.name} (${option.sku})`}
+                getOptionLabel={(option) => option.name ? `${option.name} (${option.sku})` : ''}
                 value={selectedProduct}
                 onChange={handleProductChange}
+                isOptionEqualToValue={(option, value) => option._id === value?._id}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -255,6 +257,21 @@ const TransactionForm = () => {
                     required
                   />
                 )}
+                renderOption={(props, option) => (
+                  <li {...props}>
+                    <Box>
+                      <Typography variant="body1">
+                        {option.name} ({option.sku})
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        Stock: {option.quantity} {option.unitOfMeasure}
+                      </Typography>
+                    </Box>
+                  </li>
+                )}
+                loading={loading}
+                loadingText="Loading products..."
+                noOptionsText="No products found"
               />
             </Grid>
             

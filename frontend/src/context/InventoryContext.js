@@ -25,18 +25,13 @@ export const InventoryProvider = ({ children }) => {
   // Fetch all products
   const fetchProducts = async (params = {}) => {
     try {
-      setLoading(true);
-      setError(null);
-      
       const response = await axios.get('/products', { params });
-      
-      setProducts(response.data.data);
-      setLoading(false);
-      
-      return response.data;
+      return {
+        data: response.data.data || [],
+        count: response.data.count || 0
+      };
     } catch (err) {
-      setLoading(false);
-      setError(err.response?.data?.message || 'Error fetching products');
+      console.error('Error fetching products:', err);
       throw err;
     }
   };
@@ -44,17 +39,10 @@ export const InventoryProvider = ({ children }) => {
   // Fetch low stock products
   const fetchLowStockProducts = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      
       const response = await axios.get('/products/low-stock');
-      
-      setLoading(false);
-      
-      return response.data;
+      return response.data || [];
     } catch (err) {
-      setLoading(false);
-      setError(err.response?.data?.message || 'Error fetching low stock products');
+      console.error('Error fetching low stock products:', err);
       throw err;
     }
   };
@@ -63,13 +51,9 @@ export const InventoryProvider = ({ children }) => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      setError(null);
-      
       const response = await axios.get('/categories');
-      
       setCategories(response.data);
       setLoading(false);
-      
       return response.data;
     } catch (err) {
       setLoading(false);
@@ -184,17 +168,10 @@ export const InventoryProvider = ({ children }) => {
   // Get transactions summary
   const getTransactionsSummary = async (params = {}) => {
     try {
-      setLoading(true);
-      setError(null);
-      
       const response = await axios.get('/transactions/summary', { params });
-      
-      setLoading(false);
-      
-      return response.data;
+      return response.data || {};
     } catch (err) {
-      setLoading(false);
-      setError(err.response?.data?.message || 'Error fetching transactions summary');
+      console.error('Error fetching transactions summary:', err);
       throw err;
     }
   };

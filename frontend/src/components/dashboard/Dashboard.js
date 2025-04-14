@@ -6,7 +6,9 @@ import {
   Typography,
   Button,
   Box,
-  Divider
+  Divider,
+  Alert,
+  Snackbar
 } from '@mui/material';
 import {
   Inventory as InventoryIcon,
@@ -21,80 +23,94 @@ import LowStockAlert from './LowStockAlert';
 import axios from '../../utils/axiosConfig';
 
 const Dashboard = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const { 
-    loading, 
-    error, 
-    fetchProducts, 
-    fetchLowStockProducts, 
-    getTransactionsSummary 
-  } = useContext(InventoryContext);
-  
-  const [stats, setStats] = useState({
-    totalProducts: 0,
-    totalCategories: 0,
-    totalTransactions: 0,
-    lowStockCount: 0
+  const [dashboardData, setDashboardData] = useState({
+    stats: {
+      totalProducts: 0,
+      totalCategories: 0,
+      totalTransactions: 0,
+      lowStockCount: 0
+    },
+    lowStockProducts: [],
+    recentTransactions: [],
+    transactionsSummary: {}
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  const [lowStockProducts, setLowStockProducts] = useState([]);
-  const [recentTransactions, setRecentTransactions] = useState([]);
-  const [transactionsSummary, setTransactionsSummary] = useState({});
+  const { fetchProducts, fetchLowStockProducts, getTransactionsSummary } = useContext(InventoryContext);
   
   useEffect(() => {
+    let isMounted = true;
+    
     const loadDashboardData = async () => {
       try {
-        setIsLoading(true);
-        // Fetch products
-        const productsResponse = await fetchProducts();
-        
-        // Fetch categories
-        const categoriesResponse = await axios.get('/categories');
-        
-        // Fetch low stock products
-        const lowStockResponse = await fetchLowStockProducts();
-        
-        // Fetch transactions
-        const transactionsResponse = await axios.get('/transactions');
-        
-        // Fetch transactions summary (last 30 days)
-        const today = new Date();
-        const thirtyDaysAgo = new Date(today);
-        thirtyDaysAgo.setDate(today.getDate() - 30);
-        
-        const summaryResponse = await getTransactionsSummary({
-          startDate: thirtyDaysAgo.toISOString(),
-          endDate: today.toISOString()
-        });
-        
-        // Update state
-        setLowStockProducts(lowStockResponse || []);
-        setRecentTransactions(transactionsResponse?.data?.slice(0, 5) || []); // Last 5 transactions
-        setTransactionsSummary(summaryResponse || {});
-        
-        setStats({
-          totalProducts: productsResponse?.count || 0,
-          totalCategories: categoriesResponse?.data?.length || 0,
-          totalTransactions: transactionsResponse?.data?.length || 0,
-          lowStockCount: lowStockResponse?.length || 0
-        });
-        
-        setIsLoading(false);
+        const [
+          productsResponse,
+          categoriesResponse,
+          lowStockResponse,
+          transactionsResponse,
+          summaryResponse
+        ] = await Promise.all([
+          fetchProducts(),
+          axios.get('/categories'),
+          fetchLowStockProducts(),
+          axios.get('/transactions'),
+          getTransactionsSummary({
+            startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+            endDate: new Date().toISOString()
+          })
+        ]);
+
+        if (isMounted) {
+          setDashboardData({
+            stats: {
+              totalProducts: productsResponse?.count || 0,
+              totalCategories: categoriesResponse?.data?.length || 0,
+              totalTransactions: transactionsResponse?.data?.length || 0,
+              lowStockCount: lowStockResponse?.length || 0
+            },
+            lowStockProducts: lowStockResponse || [],
+            recentTransactions: transactionsResponse?.data?.slice(0, 5) || [],
+            transactionsSummary: summaryResponse || {}
+          });
+          setIsLoading(false);
+        }
       } catch (err) {
-        console.error('Error loading dashboard data:', err);
-        setIsLoading(false);
+        if (isMounted) {
+          console.error('Error loading dashboard data:', err);
+          setError('Failed to load dashboard data. Please try again later.');
+          setIsLoading(false);
+        }
       }
     };
-    
+
     loadDashboardData();
-  }, [fetchProducts, fetchLowStockProducts, getTransactionsSummary]);
-  
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Empty dependency array since we only want to load once
+
   if (isLoading) {
-    return <Loader message="Loading dashboard..." />;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <Loader message="Loading dashboard..." />
+      </Box>
+    );
   }
-  
+
+  const { stats, lowStockProducts, transactionsSummary } = dashboardData;
+
   return (
     <Box>
+      {error && (
+        <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
+          <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        </Snackbar>
+      )}
+      
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" component="h1">
           Dashboard

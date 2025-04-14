@@ -32,7 +32,8 @@ const ProductForm = () => {
     sku: '',
     category: '',
     quantity: 0,
-    unitOfMeasure: 'piece',
+    unitOfMeasure: 'gr',
+    size: '',
     unitPrice: 0,
     currency: 'MAD',
     costPrice: 0,
@@ -50,19 +51,27 @@ const ProductForm = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   
+  // Size options
+  const sizeOptions = [
+    { value: 'S', label: 'Small (S)' },
+    { value: 'M', label: 'Medium (M)' },
+    { value: 'L', label: 'Large (L)' },
+    { value: 'XL', label: 'Extra Large (XL)' },
+    { value: 'XXL', label: 'Double Extra Large (XXL)' },
+    { value: 'XXXL', label: 'Triple Extra Large (XXXL)' }
+  ];
+  
   // Units of measure options
   const unitOptions = [
+    { value: 'gr', label: 'Gr.' },
+    { value: 'kg', label: 'Kg' },
     { value: 'piece', label: 'Piece' },
-    { value: 'kg', label: 'Kilogram (kg)' },
-    { value: 'g', label: 'Gram (g)' },
-    { value: 'mg', label: 'Milligram (mg)' },
-    { value: 'L', label: 'Liter (L)' },
-    { value: 'ml', label: 'Milliliter (ml)' },
+    { value: 'L', label: 'L' },
+    { value: 'ml', label: 'ml' },
     { value: 'box', label: 'Box' },
     { value: 'pack', label: 'Pack' },
     { value: 'set', label: 'Set' },
-    { value: 'pair', label: 'Pair' },
-    { value: 'other', label: 'Other' }
+    { value: 'pair', label: 'Pair' }
   ];
   
   // Currency options
@@ -103,7 +112,8 @@ const ProductForm = () => {
             sku: productData.sku || '',
             category: productData.category?._id || '',
             quantity: productData.quantity || 0,
-            unitOfMeasure: productData.unitOfMeasure || 'piece',
+            unitOfMeasure: productData.unitOfMeasure || 'gr',
+            size: productData.size || '',
             unitPrice: productData.unitPrice || 0,
             currency: productData.currency || 'MAD',
             costPrice: productData.costPrice || 0,
@@ -374,15 +384,34 @@ const ProductForm = () => {
             
             <Grid item xs={12} md={4}>
               <FormControl fullWidth>
-                <InputLabel id="unit-label">Unit of Measure</InputLabel>
+                <InputLabel id="unit-label">Unit</InputLabel>
                 <Select
                   labelId="unit-label"
                   name="unitOfMeasure"
                   value={product.unitOfMeasure}
                   onChange={handleChange}
-                  label="Unit of Measure"
+                  label="Unit"
                 >
                   {unitOptions.map(option => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth>
+                <InputLabel id="size-label">Size</InputLabel>
+                <Select
+                  labelId="size-label"
+                  name="size"
+                  value={product.size}
+                  onChange={handleChange}
+                  label="Size"
+                >
+                  {sizeOptions.map(option => (
                     <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
