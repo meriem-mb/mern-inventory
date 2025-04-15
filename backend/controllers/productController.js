@@ -83,7 +83,7 @@ exports.getProduct = async (req, res) => {
 
 // @desc    Create new product
 // @route   POST /api/products
-// @access  Private (Admin/Manager)
+// @access  Private
 exports.createProduct = async (req, res) => {
   try {
     const {
@@ -148,7 +148,7 @@ exports.createProduct = async (req, res) => {
 
 // @desc    Update product
 // @route   PUT /api/products/:id
-// @access  Private (Admin/Manager)
+// @access  Private
 exports.updateProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -185,7 +185,7 @@ exports.updateProduct = async (req, res) => {
 
 // @desc    Delete product
 // @route   DELETE /api/products/:id
-// @access  Private (Admin)
+// @access  Private
 exports.deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);

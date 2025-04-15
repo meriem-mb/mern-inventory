@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -17,30 +17,25 @@ import {
   Alert
 } from '@mui/material';
 import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import InventoryContext from '../../context/InventoryContext';
 import Loader from '../layout/Loader';
 import axios from '../../utils/axiosConfig';
 
 const ProductForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { categories, suppliers, fetchCategories, fetchSuppliers } = useContext(InventoryContext);
   
   const [product, setProduct] = useState({
     name: '',
     description: '',
     sku: '',
-    category: '',
     quantity: 0,
-    unitOfMeasure: 'gr',
+    unitOfMeasure: '',
     size: '',
     unitPrice: 0,
     currency: 'MAD',
     costPrice: 0,
     minStockLevel: 0,
     location: '',
-    supplier: '',
-    barcode: '',
     isActive: true
   });
   
@@ -84,17 +79,6 @@ const ProductForm = () => {
     { value: 'AUD', label: 'Australian Dollar (AUD)' }
   ];
   
-  // Fetch categories and suppliers if not already loaded
-  useEffect(() => {
-    if (categories.length === 0) {
-      fetchCategories();
-    }
-    
-    if (suppliers.length === 0) {
-      fetchSuppliers();
-    }
-  }, [categories, suppliers, fetchCategories, fetchSuppliers]);
-  
   // Fetch product if editing
   useEffect(() => {
     const fetchProduct = async () => {
@@ -110,17 +94,14 @@ const ProductForm = () => {
             name: productData.name || '',
             description: productData.description || '',
             sku: productData.sku || '',
-            category: productData.category?._id || '',
             quantity: productData.quantity || 0,
-            unitOfMeasure: productData.unitOfMeasure || 'gr',
+            unitOfMeasure: productData.unitOfMeasure || '',
             size: productData.size || '',
             unitPrice: productData.unitPrice || 0,
             currency: productData.currency || 'MAD',
             costPrice: productData.costPrice || 0,
             minStockLevel: productData.minStockLevel || 0,
             location: productData.location || '',
-            supplier: productData.supplier?._id || '',
-            barcode: productData.barcode || '',
             isActive: productData.isActive === undefined ? true : productData.isActive
           });
           
@@ -174,10 +155,6 @@ const ProductForm = () => {
     
     if (!product.sku.trim()) {
       errors.sku = 'SKU is required';
-    }
-    
-    if (!product.category) {
-      errors.category = 'Category is required';
     }
     
     if (product.unitPrice < 0) {
@@ -249,37 +226,76 @@ const ProductForm = () => {
   }
   
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1">
-          {isEditing ? 'Edit Product' : 'Add New Product'}
-        </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/products')}
-        >
-          Back to Products
-        </Button>
-      </Box>
-      
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
-      
-      <Paper elevation={3} sx={{ p: 3 }}>
+    <Box sx={{ maxWidth: 1200, margin: '0 auto', p: 2 }}>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 3, 
+          borderRadius: 2,
+          border: '1px solid #e0e0e0',
+          backgroundColor: '#fff',
+          mb: 3
+        }}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          mb: 4 
+        }}>
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            sx={{ 
+              fontWeight: 600,
+              color: '#1976d2'
+            }}
+          >
+            {isEditing ? 'Edit Product' : 'Add New Product'}
+          </Typography>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate('/products')}
+            sx={{ 
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 500
+            }}
+          >
+            Back to Products
+          </Button>
+        </Box>
+
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 3,
+              borderRadius: 2
+            }}
+          >
+            {error}
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             {/* Basic Information */}
             <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 500,
+                  color: '#2c3e50',
+                  mb: 1
+                }}
+              >
                 Basic Information
               </Typography>
-              <Divider sx={{ mb: 2 }} />
+              <Divider sx={{ mb: 3 }} />
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -288,24 +304,34 @@ const ProductForm = () => {
                 value={product.name}
                 onChange={handleChange}
                 error={!!validationErrors.name}
-                helperText={validationErrors.name}
+                helperText={validationErrors.name || 'Enter the name of your product'}
                 required
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  }
+                }}
               />
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="SKU (Stock Keeping Unit)"
+                label="SKU"
                 name="sku"
                 value={product.sku}
                 onChange={handleChange}
                 error={!!validationErrors.sku}
-                helperText={validationErrors.sku}
+                helperText={validationErrors.sku || 'Unique identifier for your product'}
                 required
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  }
+                }}
               />
             </Grid>
-            
+
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -315,59 +341,30 @@ const ProductForm = () => {
                 onChange={handleChange}
                 multiline
                 rows={3}
+                helperText="Add a detailed description of your product (optional)"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  }
+                }}
               />
             </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth error={!!validationErrors.category} required>
-                <InputLabel id="category-label">Category</InputLabel>
-                <Select
-                  labelId="category-label"
-                  name="category"
-                  value={product.category}
-                  onChange={handleChange}
-                  label="Category"
-                >
-                  {categories.map(category => (
-                    <MenuItem key={category._id} value={category._id}>
-                      {category.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {validationErrors.category && (
-                  <FormHelperText>{validationErrors.category}</FormHelperText>
-                )}
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel id="supplier-label">Supplier</InputLabel>
-                <Select
-                  labelId="supplier-label"
-                  name="supplier"
-                  value={product.supplier}
-                  onChange={handleChange}
-                  label="Supplier"
-                >
-                  <MenuItem value="">None</MenuItem>
-                  {suppliers.map(supplier => (
-                    <MenuItem key={supplier._id} value={supplier._id}>
-                      {supplier.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            
+
             {/* Stock Information */}
             <Grid item xs={12} sx={{ mt: 2 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 500,
+                  color: '#2c3e50',
+                  mb: 1
+                }}
+              >
                 Stock Information
               </Typography>
-              <Divider sx={{ mb: 2 }} />
+              <Divider sx={{ mb: 3 }} />
             </Grid>
-            
+
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
@@ -377,13 +374,26 @@ const ProductForm = () => {
                 value={product.quantity}
                 onChange={handleChange}
                 InputProps={{
-                  inputProps: { min: 0, step: 1 }
+                  inputProps: { min: 0 }
+                }}
+                helperText="Current stock quantity"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  }
                 }}
               />
             </Grid>
-            
+
             <Grid item xs={12} md={4}>
-              <FormControl fullWidth>
+              <FormControl 
+                fullWidth
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  }
+                }}
+              >
                 <InputLabel id="unit-label">Unit</InputLabel>
                 <Select
                   labelId="unit-label"
@@ -392,17 +402,28 @@ const ProductForm = () => {
                   onChange={handleChange}
                   label="Unit"
                 >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
                   {unitOptions.map(option => (
                     <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>Measurement unit (optional)</FormHelperText>
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={12} md={4}>
-              <FormControl fullWidth>
+              <FormControl 
+                fullWidth
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  }
+                }}
+              >
                 <InputLabel id="size-label">Size</InputLabel>
                 <Select
                   labelId="size-label"
@@ -411,16 +432,20 @@ const ProductForm = () => {
                   onChange={handleChange}
                   label="Size"
                 >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
                   {sizeOptions.map(option => (
                     <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>Product size (optional)</FormHelperText>
               </FormControl>
             </Grid>
-            
-            <Grid item xs={12} md={4}>
+
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 type="number"
@@ -429,13 +454,18 @@ const ProductForm = () => {
                 value={product.minStockLevel}
                 onChange={handleChange}
                 error={!!validationErrors.minStockLevel}
-                helperText={validationErrors.minStockLevel}
+                helperText={validationErrors.minStockLevel || "Alert threshold for low stock"}
                 InputProps={{
-                  inputProps: { min: 0, step: 1 }
+                  inputProps: { min: 0 }
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  }
                 }}
               />
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -443,28 +473,30 @@ const ProductForm = () => {
                 name="location"
                 value={product.location}
                 onChange={handleChange}
-                placeholder="e.g., Warehouse A, Shelf B3"
+                helperText="Where this product is stored (optional)"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  }
+                }}
               />
             </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Barcode"
-                name="barcode"
-                value={product.barcode}
-                onChange={handleChange}
-              />
-            </Grid>
-            
+
             {/* Pricing Information */}
             <Grid item xs={12} sx={{ mt: 2 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 500,
+                  color: '#2c3e50',
+                  mb: 1
+                }}
+              >
                 Pricing Information
               </Typography>
-              <Divider sx={{ mb: 2 }} />
+              <Divider sx={{ mb: 3 }} />
             </Grid>
-            
+
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
@@ -474,14 +506,19 @@ const ProductForm = () => {
                 value={product.unitPrice}
                 onChange={handleChange}
                 error={!!validationErrors.unitPrice}
-                helperText={validationErrors.unitPrice}
+                helperText={validationErrors.unitPrice || "Product's selling price"}
                 InputProps={{
                   inputProps: { min: 0, step: 0.01 },
                   startAdornment: <InputAdornment position="start">{product.currency}</InputAdornment>,
                 }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  }
+                }}
               />
             </Grid>
-            
+
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
@@ -491,16 +528,28 @@ const ProductForm = () => {
                 value={product.costPrice}
                 onChange={handleChange}
                 error={!!validationErrors.costPrice}
-                helperText={validationErrors.costPrice}
+                helperText={validationErrors.costPrice || "Product's purchase cost"}
                 InputProps={{
                   inputProps: { min: 0, step: 0.01 },
                   startAdornment: <InputAdornment position="start">{product.currency}</InputAdornment>,
                 }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  }
+                }}
               />
             </Grid>
-            
+
             <Grid item xs={12} md={4}>
-              <FormControl fullWidth>
+              <FormControl 
+                fullWidth
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  }
+                }}
+              >
                 <InputLabel id="currency-label">Currency</InputLabel>
                 <Select
                   labelId="currency-label"
@@ -515,23 +564,36 @@ const ProductForm = () => {
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>Select currency</FormHelperText>
               </FormControl>
             </Grid>
-            
+
             {/* Product Image */}
             <Grid item xs={12} sx={{ mt: 2 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 500,
+                  color: '#2c3e50',
+                  mb: 1
+                }}
+              >
                 Product Image
               </Typography>
-              <Divider sx={{ mb: 2 }} />
+              <Divider sx={{ mb: 3 }} />
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <Button
                 variant="outlined"
                 component="label"
                 fullWidth
-                sx={{ height: '56px' }}
+                sx={{ 
+                  height: '56px',
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 500
+                }}
               >
                 {imagePreview ? 'Change Image' : 'Upload Image'}
                 <input
@@ -541,8 +603,9 @@ const ProductForm = () => {
                   onChange={handleImageChange}
                 />
               </Button>
+              <FormHelperText>Upload a product image (optional)</FormHelperText>
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               {imagePreview && (
                 <Box
@@ -551,30 +614,41 @@ const ProductForm = () => {
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    p: 1
+                    border: '1px solid #e0e0e0',
+                    borderRadius: 2,
+                    p: 1,
+                    bgcolor: '#f5f5f5'
                   }}
                 >
                   <img
                     src={imagePreview}
                     alt="Product preview"
-                    style={{ maxHeight: '100%', maxWidth: '100%' }}
+                    style={{ 
+                      maxHeight: '100%', 
+                      maxWidth: '100%',
+                      objectFit: 'contain'
+                    }}
                   />
                 </Box>
               )}
             </Grid>
-            
+
             {/* Submit Button */}
-            <Grid item xs={12} sx={{ mt: 3 }}>
+            <Grid item xs={12} sx={{ mt: 4 }}>
               <Button
                 type="submit"
                 variant="contained"
                 size="large"
                 startIcon={<SaveIcon />}
                 disabled={loading}
+                sx={{ 
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  py: 1.5
+                }}
               >
-                {loading ? 'Saving...' : 'Save Product'}
+                {loading ? 'Saving...' : isEditing ? 'Update Product' : 'Save Product'}
               </Button>
             </Grid>
           </Grid>

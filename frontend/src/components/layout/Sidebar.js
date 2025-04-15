@@ -1,14 +1,15 @@
-import React, { useContext } from 'react';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
+  Box,
   Drawer,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Toolbar,
+  ListItemButton,
   Divider,
-  Box
+  Typography
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -16,84 +17,97 @@ import {
   Category as CategoryIcon,
   LocalShipping as SupplierIcon,
   SwapHoriz as TransactionIcon,
-  Settings as SettingsIcon,
-  Person as UserIcon,
   Assessment as ReportIcon
 } from '@mui/icons-material';
-import AuthContext from '../../context/AuthContext';
 
-const drawerWidth = 240;
+const menuItems = [
+  {
+    text: 'Dashboard',
+    icon: <DashboardIcon />,
+    path: '/dashboard'
+  },
+  {
+    text: 'Products',
+    icon: <InventoryIcon />,
+    path: '/products'
+  },
+  {
+    text: 'Categories',
+    icon: <CategoryIcon />,
+    path: '/categories'
+  },
+  {
+    text: 'Suppliers',
+    icon: <SupplierIcon />,
+    path: '/suppliers'
+  },
+  {
+    text: 'Transactions',
+    icon: <TransactionIcon />,
+    path: '/transactions'
+  },
+  {
+    text: 'Reports',
+    icon: <ReportIcon />,
+    path: '/reports'
+  }
+];
 
-const Sidebar = ({ open }) => {
+const Sidebar = ({ drawerWidth }) => {
   const location = useLocation();
-  const { isAdmin, isManager } = useContext(AuthContext);
-
-  const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-    { text: 'Products', icon: <InventoryIcon />, path: '/products' },
-    { text: 'Categories', icon: <CategoryIcon />, path: '/categories' },
-    { text: 'Suppliers', icon: <SupplierIcon />, path: '/suppliers' },
-    { text: 'Transactions', icon: <TransactionIcon />, path: '/transactions' },
-    { text: 'Reports', icon: <ReportIcon />, path: '/reports' },
-  ];
-
-  const adminItems = [
-    { text: 'Users', icon: <UserIcon />, path: '/users', admin: true },
-    { text: 'Settings', icon: <SettingsIcon />, path: '/settings', manager: true }
-  ];
 
   return (
     <Drawer
-      variant="persistent"
-      open={open}
+      variant="permanent"
       sx={{
         width: drawerWidth,
         flexShrink: 0,
-        [`& .MuiDrawer-paper`]: {
+        '& .MuiDrawer-paper': {
           width: drawerWidth,
           boxSizing: 'border-box',
+          backgroundColor: '#f5f5f5',
+          borderRight: '1px solid #e0e0e0'
         },
       }}
     >
-      <Toolbar />
-      <Box sx={{ overflow: 'auto' }}>
-        <List>
-          {menuItems.map((item) => (
-            <ListItem
-              button
-              key={item.text}
-              component={RouterLink}
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6" sx={{ color: '#1976d2' }}>
+          Inventory Management
+        </Typography>
+      </Box>
+      <Divider />
+      <List>
+        {menuItems.map((item) => (
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton
+              component={Link}
               to={item.path}
               selected={location.pathname === item.path}
+              sx={{
+                '&.Mui-selected': {
+                  backgroundColor: '#e3f2fd',
+                  '&:hover': {
+                    backgroundColor: '#bbdefb',
+                  },
+                },
+              }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItem>
-          ))}
-        </List>
-        <Divider />
-        <List>
-          {adminItems.map((item) => {
-            // Only show admin items to admins and manager items to managers or admins
-            if ((item.admin && !isAdmin) || (item.manager && !isManager)) {
-              return null;
-            }
-            
-            return (
-              <ListItem
-                button
-                key={item.text}
-                component={RouterLink}
-                to={item.path}
-                selected={location.pathname === item.path}
-              >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItem>
-            );
-          })}
-        </List>
-      </Box>
+              <ListItemIcon sx={{ color: location.pathname === item.path ? '#1976d2' : 'inherit' }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText 
+                primary={item.text}
+                sx={{
+                  '& .MuiTypography-root': {
+                    color: location.pathname === item.path ? '#1976d2' : 'inherit',
+                    fontWeight: location.pathname === item.path ? 500 : 400,
+                  },
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
     </Drawer>
   );
 };

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 const {
   getCategories,
   getCategory,
@@ -16,16 +16,12 @@ router.get('/', protect, getCategories);
 router.get('/:id', protect, getCategory);
 
 // Create new category
-router.post('/', protect, authorize('admin', 'manager'), createCategory);
+router.post('/', protect, createCategory);
 
 // Update category
-router.put('/:id', protect, authorize('admin', 'manager'), updateCategory);
+router.put('/:id', protect, updateCategory);
 
 // Delete category
-router.delete('/:id', protect, authorize('admin'), deleteCategory);
+router.delete('/:id', protect, deleteCategory);
 
-
-router.get('/', (req, res) => {
-    res.json({ message: 'Category routes working' });
-  });
 module.exports = router;

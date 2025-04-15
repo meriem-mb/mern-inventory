@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 const {
   getSuppliers,
   getSupplier,
@@ -16,18 +16,12 @@ router.get('/', protect, getSuppliers);
 router.get('/:id', protect, getSupplier);
 
 // Create new supplier
-router.post('/', protect, authorize('admin', 'manager'), createSupplier);
+router.post('/', protect, createSupplier);
 
 // Update supplier
-router.put('/:id', protect, authorize('admin', 'manager'), updateSupplier);
+router.put('/:id', protect, updateSupplier);
 
 // Delete supplier
-router.delete('/:id', protect, authorize('admin'), deleteSupplier);
+router.delete('/:id', protect, deleteSupplier);
 
-
-router.get('/', (req, res) => {
-    res.json({ message: 'Supplier routes working' });
-  });
-
-  
 module.exports = router;

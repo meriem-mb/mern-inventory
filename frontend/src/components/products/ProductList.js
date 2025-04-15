@@ -36,7 +36,6 @@ import axios from '../../utils/axiosConfig';
 const ProductList = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isManager } = useContext(AuthContext);
   const { categories, fetchCategories } = useContext(InventoryContext);
   
   const [products, setProducts] = useState([]);
@@ -252,54 +251,46 @@ const ProductList = () => {
                     </Link>
                   </TableCell>
                   <TableCell>{product.sku}</TableCell>
-                  <TableCell>{product.category ? product.category.name : 'Uncategorized'}</TableCell>
+                  <TableCell>{product.category?.name || 'N/A'}</TableCell>
                   <TableCell align="right">
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                      {product.quantity <= product.minStockLevel && (
-                        <WarningIcon color="warning" fontSize="small" sx={{ mr: 1 }} />
-                      )}
-                      {product.quantity} {product.unitOfMeasure}
-                    </Box>
+                    {product.quantity}
+                    {product.quantity <= product.minStockLevel && (
+                      <WarningIcon color="warning" sx={{ ml: 1, verticalAlign: 'bottom' }} />
+                    )}
                   </TableCell>
                   <TableCell align="right">
                     {product.currency} {product.unitPrice.toFixed(2)}
                   </TableCell>
                   <TableCell>
-                    <Chip 
-                      label={product.isActive ? "Active" : "Inactive"} 
-                      color={product.isActive ? "success" : "default"} 
+                    <Chip
+                      label={product.isActive ? 'Active' : 'Inactive'}
+                      color={product.isActive ? 'success' : 'default'}
                       size="small"
                     />
                   </TableCell>
                   <TableCell align="center">
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                      {isManager && (
-                        <IconButton 
-                          component={Link} 
-                          to={`/products/${product._id}/edit`}
-                          color="primary"
-                          size="small"
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      )}
-                      {isManager && (
-                        <IconButton 
-                          color="error" 
-                          size="small"
-                          onClick={() => handleDelete(product._id)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      )}
-                    </Box>
+                    <IconButton
+                      component={Link}
+                      to={`/products/${product._id}/edit`}
+                      color="primary"
+                      size="small"
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => handleDelete(product._id)}
+                      color="error"
+                      size="small"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell colSpan={7} align="center">
-                  No products found.
+                  No products found
                 </TableCell>
               </TableRow>
             )}
@@ -309,12 +300,11 @@ const ProductList = () => {
       
       {/* Pagination */}
       <TablePagination
-        rowsPerPageOptions={[5, 10, 25, 50]}
         component="div"
         count={totalProducts}
-        rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
     </Box>
